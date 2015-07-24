@@ -12,7 +12,7 @@ extern "C" {
  * Method:    jniConvert
  * Signature: (III)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_samjung_pimonitor_com_jniconvert_jniConvert
+JNIEXPORT jbyteArray JNICALL Java_samjung_pimonitor_com_jniconvert_jniConvert
   (JNIEnv *, jobject, jint, jint, jint);
 
 #ifdef __cplusplus

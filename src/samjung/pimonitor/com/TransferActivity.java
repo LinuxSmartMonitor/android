@@ -16,6 +16,7 @@
 
 package samjung.pimonitor.com;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -30,7 +31,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.widget.ImageView;
 
 public class TransferActivity extends Activity {
@@ -57,8 +57,8 @@ protected void onCreate(Bundle savedInstanceState) {
         message = "Hello, Echo?";
        
         // Set the xml file to be activity layout
-       // setContentView(R.layout.displaymessage);
-        setContentView(new Pi_View(getApplicationContext()));
+        setContentView(R.layout.displaymessage);
+        //setContentView(new Pi_View(getApplicationContext()));
         imgv = (ImageView)findViewById(R.id.imageView1);
         mHandler = new MyHandler();
         Converting = new jniconvert();
@@ -88,22 +88,22 @@ Thread inputThread = new Thread(new Runnable() {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	        
+	        /*
 		// send message to Pi
 		while(true)
 		{
             byte[] sendData = new byte[3072];
         
-/*********************
- * 			데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용     *************************/            
-            String sentence = Converting.jniConvert(1, 15, 3);
+		//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
+            sendData = Converting.jniConvert(321, 15, 3);
             
             
             
+//            DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+//            dos.
+          
+            //Log.d("CONVERTED", Integer.sendData + " " + (int)sendData>>1024 + " " + (int)sendData >> 2048);
             
-            
-            
-            sendData = sentence.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
             try {
 				clientSocket.send(sendPacket);
@@ -111,7 +111,7 @@ Thread inputThread = new Thread(new Runnable() {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}   
-		}
+		}*/
 	
 			
 	}
@@ -170,8 +170,13 @@ Thread outputThread = new Thread(new Runnable() {
 				            System.arraycopy(receiveData1, 
 				                    0,
 				                    bufferOut,
-				                    i*49152,
+				                    receiveData1[0]*49152,
 				                    49152);
+				           /* System.arraycopy(receiveData1, 
+				                    0,
+				                    bufferOut,
+				                    i*49152,
+				                    49152);*/
 				         
 		            
 			        } 
@@ -181,7 +186,7 @@ Thread outputThread = new Thread(new Runnable() {
 				}
 				bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 				bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(( bufferOut )));
-				
+				mHandler.sendMessage(mHandler.obtainMessage(1, 0, 0, 0));
 				
 			}
 			
