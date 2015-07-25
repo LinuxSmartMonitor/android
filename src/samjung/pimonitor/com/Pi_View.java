@@ -126,7 +126,7 @@ public class Pi_View extends SurfaceView implements Callback {
 			byte[] sendData = new byte[3072];
 
 			while (true) {
-n
+
 				if (clickflag) {
 					mouse_value = 1;
 					sendData = Converting.jniConvert(TransferActivity.display_width / mouse_x  ,  TransferActivity.display_height / mouse_y  ,
