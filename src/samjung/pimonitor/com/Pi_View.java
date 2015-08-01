@@ -75,10 +75,13 @@ public class Pi_View extends SurfaceView implements Callback {
 					{
 						//imgbit = UsbTest.bitmap;
 						
+						if(TransferActivity.bitmap != null)
+						{
 //							imgbit = (TransferActivity.bitmap);
 							imgbit = Bitmap.createScaledBitmap((TransferActivity.bitmap), TransferActivity.display_width,TransferActivity.display_height, true);
 							can.drawBitmap(imgbit,0,0,null);
 							
+						}
 					
 					}
 				}finally{

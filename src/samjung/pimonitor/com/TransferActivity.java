@@ -190,11 +190,12 @@ Thread outputThread = new Thread(new Runnable() {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}   
-       
+        
+       	bufferOut = new byte[49152*8];
 		while(true)
 		{
 				       
-			bufferOut = new byte[49152*8];
+		
 			//bitmap=null;
 			int ou=0;
 			for(int i=0; i<8; i++){
