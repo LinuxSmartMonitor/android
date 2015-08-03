@@ -16,7 +16,6 @@
 
 package samjung.pimonitor.com;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -32,17 +31,20 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
-import android.widget.ImageView;
+import android.view.View;
+import android.widget.FrameLayout;
 
-public class TransferActivity extends Activity {
-    public static final String SERVERIP = "192.168.49.172";
+public class TransferActivity extends Activity{
+	public boolean clickflag =false;
+	public float minX=2000, minY=2000, maxX=0, maxY=0;
+	int mouse_x = 0, mouse_y = 0;
+    public static final String SERVERIP = "192.168.49.151";
     public static final int SERVERPORT_OUT = 3490;
     public static final int SERVERPORT_IN = 3491;
     public String message;
@@ -69,6 +71,11 @@ public class TransferActivity extends Activity {
 	int y;
 	int mouse_value;
 	// MOUSE ######################## end 1 
+	
+	View mView;
+	FrameLayout mSurfaceView;
+	Pi_View mPiView;
+	
    
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +88,26 @@ protected void onCreate(Bundle savedInstanceState) {
         // Set the xml file to be activity layout
         //setContentView(R.layout.displaymessage);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        setContentView(new Pi_View(getApplicationContext()));
+        
+        //setContentView(new Pi_View(getApplicationContext()));
+        try {
+			setContentView(R.layout.activity_main);
+			mView = (View)findViewById(R.id.touchview);
+			mView.setOnTouchListener(mViewTouchListener);
+			
+			
+			
+			mSurfaceView = (FrameLayout)findViewById(R.id.surface);
+			mPiView = new Pi_View(getApplicationContext());
+			mSurfaceView.addView(mPiView); // please add view
+		}catch(Exception e){
+			//mSurfaceView.removeView(mPiView);
+			//mSurfaceView.addView(mPiView);
+			Log.e("PiMonitor", "addView error");
+			e.printStackTrace();
+		}
+        
+        
         //imgv = (ImageView)findViewById(R.id.imageView1);
         //imgv2 = (ImageView)findViewById(R.id.imageView2);
         
@@ -89,6 +115,7 @@ protected void onCreate(Bundle savedInstanceState) {
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		display_width=metrics.widthPixels;
 		display_height=metrics.heightPixels;
+		Log.i("Display " ,"width : " + display_width + " height : " +  display_height);
         
 //        mHandler = new MyHandler();
         Converting = new jniconvert();
@@ -96,14 +123,8 @@ protected void onCreate(Bundle savedInstanceState) {
         // and start thread to do networking
         outputThread.start();
         openInputSocket.start();
+        mouseOutputThread.start();
         //inputThread.start();
-        
-        
-        // MOUSE ######################## start 2
-        Context context = this.getApplicationContext();
-		mDoubleTapGesture = new GestureDetector(context, mNullListener); // 더블탭 제스쳐 생성
-		mDoubleTapGesture.setOnDoubleTapListener(mDoubleTapListener); // 더블 탭 리스너 등록
-		// MOUSE ######################## start 2
     }
 
 Thread openInputSocket = new Thread(new Runnable() {
@@ -152,8 +173,6 @@ Thread inputThread = new Thread(new Runnable() {
 				e1.printStackTrace();
 			}   
 		}
-	
-			
 	}
 });
 
@@ -178,7 +197,6 @@ Thread outputThread = new Thread(new Runnable() {
 	        
 		 // send message to Pi
 		
-		
         byte[] sendData = new byte[2];
     
         String sentence = "1";
@@ -194,8 +212,6 @@ Thread outputThread = new Thread(new Runnable() {
        	bufferOut = new byte[49152*8];
 		while(true)
 		{
-				       
-		
 			//bitmap=null;
 			int ou=0;
 			for(int i=0; i<8; i++){
@@ -218,8 +234,6 @@ Thread outputThread = new Thread(new Runnable() {
 				                    bufferOut,
 				                    i*49152,
 				                    49152);*/
-				         
-		            
 			        } 
 			        catch (Exception e) {
 			            e.printStackTrace();
@@ -228,7 +242,6 @@ Thread outputThread = new Thread(new Runnable() {
 				bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 				bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(( bufferOut )));
 				//mHandler.sendMessage(mHandler.obtainMessage(1, 0, 0, 0));
-				
 			}
 			
 		}
@@ -252,130 +265,50 @@ public class MyHandler extends Handler {
 	}
 }
 */
-
-
-	//MOUSE ######################## start3
-	//더블탭 리스너
-	private OnDoubleTapListener mDoubleTapListener = new OnDoubleTapListener() {
-		@Override
-		public boolean onSingleTapConfirmed(MotionEvent e) {
-			Log.i("One Click Event", "onSingleTapConfirmed");
-			x = (int) e.getY();
-			y = (int) e.getY();
-			mouse_value = 1;	// one click value
-			
-			//Send to Raspberry (x, y, value)
-			
-			
-			byte[] sendData = new byte[3072];
-	        
-			//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
-	            sendData = Converting.jniConvert(x, y, mouse_value);
-	     
-	            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
-	            try {
-					clientSocket.send(sendPacket);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}   
-			
-			
-			
-			
-			
-			
-			
-			return false;
-		}
-
-		@Override
-		public boolean onDoubleTapEvent(MotionEvent e) {
-//			Log.i("OnDoubleTapListener", "onDoubleTapEvent    2");
-			return false;
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e) {
-			Log.i("Double Click Event", "onDoubleTap");
-			x = (int) e.getY();
-			y = (int) e.getY();
-			mouse_value = 2;	// double click value
-			
-			// Send to Raspberry (x, y, value)
-			
-			byte[] sendData = new byte[3072];
-	        
-			//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
-				sendData = Converting.jniConvert(x, y, mouse_value);
-		     
-	            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
-	            try {
-					clientSocket.send(sendPacket);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}   
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			return true;
-		}
-	};
-	
-	// 아무것도 안하는 제스쳐 리스너
-		private OnGestureListener mNullListener = new OnGestureListener() {
+		// Mouse Touch Listener.
+		// screen Min X value = 11, Min Y value = 14.
+		View.OnTouchListener mViewTouchListener = new View.OnTouchListener() {
 			@Override
-			public boolean onSingleTapUp(MotionEvent e) {
-//				Log.i("OnGestureListener", "onSingleTapUp  11");
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				mouse_x = (int) event.getX() - 11;
+				mouse_y = (int) event.getY() - 14;
+				clickflag = true;
+				int mouse_value = 1;	// one click value
+				Log.d("PiMonitor", "View_Touch //  x : " + mouse_x + " y : " + mouse_y );
+				//Send to Raspberry (x, y, value)
+
+				//m.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
 				return false;
 			}
-
-			@Override
-			public void onShowPress(MotionEvent e) {
-//				Log.i("OnGestureListener", "onShowPress  22 ");
-			}
-
-			@Override
-			public boolean onScroll(MotionEvent e1, MotionEvent e2,
-					float distanceX, float distanceY) {
-//				Log.i("OnGestureListener", "onScroll  33");
-				return false;
-			}
-
-			@Override
-			public void onLongPress(MotionEvent e) {
-//				Log.i("OnGestureListener", "onLongPress  44");
-			}
-
-			@Override
-			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-					float velocityY) {
-//				Log.i("OnGestureListener", "onFling  55");
-				return false;
-			}
-
-			@Override
-			public boolean onDown(MotionEvent e) {
-//				Log.i("OnGestureListener", "onDown   66");
-				return false;
-			}
+			
 		};
+		
+		// Thread to Send Mouse data
+		Thread mouseOutputThread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				byte[] sendData = new byte[3072];
 
-		// MOUSE ######################## end3
+				while (true) {
 
+					if (clickflag) {
+						mouse_value = 1;
+						//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
+				            sendData = Converting.jniConvert(512 * mouse_x / (display_width - 25), 384 * mouse_y / (display_height - 28), mouse_value);
+				            Log.d("PiMonitor", "Change Coord //  x : " + (512 * mouse_x / (display_width - 25)) + " y : " + (384 * mouse_y / (display_height - 28)) );
+				            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
+				            try {
+								clientSocket.send(sendPacket);
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}   
+						clickflag = false;
+					}
+				}
+			}
+		});	
 }

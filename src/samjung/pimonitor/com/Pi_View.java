@@ -41,7 +41,6 @@ public class Pi_View extends SurfaceView implements Callback {
 	public void surfaceCreated(SurfaceHolder holder) {
 		// TODO Auto-generated method stub
 		mThread.start();
-		outputThread.start();
 	}
 
 	@Override
@@ -79,8 +78,7 @@ public class Pi_View extends SurfaceView implements Callback {
 						{
 //							imgbit = (TransferActivity.bitmap);
 							imgbit = Bitmap.createScaledBitmap((TransferActivity.bitmap), TransferActivity.display_width,TransferActivity.display_height, true);
-							can.drawBitmap(imgbit,0,0,null);
-							
+							can.drawBitmap(imgbit,0,0,null);	
 						}
 					
 					}
@@ -91,63 +89,4 @@ public class Pi_View extends SurfaceView implements Callback {
 		}
 		
 	}
-	
-	boolean isClick = false;
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		// TODO Auto-generated method stub
-		Log.i("BJ onTouchEvent", "onTouchEvent");
-		
-		int keyAction = event.getAction();
-		mouse_x = (int)event.getX();
-		mouse_y = (int)event.getY();
-		
-		switch (keyAction) {
-		
-		case MotionEvent.ACTION_UP:
-			if(isClick) {
-				Log.i("BJ Click Event", "x: "+mouse_x + " y : "+ mouse_y);
-				isClick = false;
-				clickflag = true;
-			}
-			
-			break;
-		case MotionEvent.ACTION_DOWN:
-			isClick = true;
-			break;
-		}
-		
-		
-		
-		return true;
-	}
-	Thread outputThread = new Thread(new Runnable() {
-		
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			byte[] sendData = new byte[3072];
-
-			while (true) {
-
-				if (clickflag) {
-					mouse_value = 1;
-					sendData = Converting.jniConvert(TransferActivity.display_width / mouse_x  ,  TransferActivity.display_height / mouse_y  ,
-							mouse_value);
-
-					DatagramPacket sendPacket = new DatagramPacket(sendData,
-							sendData.length, TransferActivity.serverAddr,
-							TransferActivity.SERVERPORT_IN);
-					try {
-						TransferActivity.clientSocket.send(sendPacket);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					clickflag = false;
-				}
-			}
-		}
-	});	
-
 }
