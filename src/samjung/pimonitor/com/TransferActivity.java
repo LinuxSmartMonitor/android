@@ -25,7 +25,6 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
@@ -34,19 +33,22 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
-public class TransferActivity extends Activity{
+public class TransferActivity extends Activity implements OnClickListener {
+	
 	public boolean clickflag =false;
 	public float minX=2000, minY=2000, maxX=0, maxY=0;
 	int mouse_x = 0, mouse_y = 0;
-    public static final String SERVERIP = "192.168.49.151";
+
+    public static final String SERVERIP = "192.168.49.164";
     public static final int SERVERPORT_OUT = 3490;
     public static final int SERVERPORT_IN = 3491;
+    
     public String message;
     int height = 384;
     int width = 512;
@@ -60,10 +62,8 @@ public class TransferActivity extends Activity{
     byte[] bufferOut;
     jniconvert Converting;
     int swit = 0;
-    
     public static DisplayMetrics metrics;
     public static int display_width,display_height ;
-/** Called when the activity is first created. */
     
     // MOUSE ######################## start 1
     private GestureDetector mDoubleTapGesture;
@@ -71,61 +71,102 @@ public class TransferActivity extends Activity{
 	int y;
 	int mouse_value;
 	// MOUSE ######################## end 1 
-	
-	View mView;
-	FrameLayout mSurfaceView;
-	Pi_View mPiView;
+    
+
+	/* SUJIN */
+	private View mView;
+	private FrameLayout mSurfaceView;
+	private Pi_View mPiView;
+	private MyKeyboard mMyKeyboard;
+	private boolean isKeyboard = false;
 	
    
-@Override
-protected void onCreate(Bundle savedInstanceState) {
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Get the message that the user entered. 
         Intent intent = getIntent();
         message = "Hello, Echo?";
-       
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        Converting = new jniconvert();
         // Set the xml file to be activity layout
         //setContentView(R.layout.displaymessage);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        
-        //setContentView(new Pi_View(getApplicationContext()));
-        try {
-			setContentView(R.layout.activity_main);
-			mView = (View)findViewById(R.id.touchview);
-			mView.setOnTouchListener(mViewTouchListener);
-			
-			
-			
-			mSurfaceView = (FrameLayout)findViewById(R.id.surface);
-			mPiView = new Pi_View(getApplicationContext());
-			mSurfaceView.addView(mPiView); // please add view
-		}catch(Exception e){
-			//mSurfaceView.removeView(mPiView);
-			//mSurfaceView.addView(mPiView);
-			Log.e("PiMonitor", "addView error");
-			e.printStackTrace();
-		}
         
         
+        /* View Setting */
+		setContentView(R.layout.activity_main);
+		mView = (View)findViewById(R.id.touchview);
+		mView.setOnTouchListener(mViewTouchListener);	
+		
+		/* Keyboard Setting */
+		mMyKeyboard = (MyKeyboard)findViewById(R.id.my_keyboard);
+		mMyKeyboard.setActionListenerEngKeyboard(this);
+		goneCustomKeyboard();
+			
+		/* SurfaceView Setting */
+		mSurfaceView = (FrameLayout)findViewById(R.id.surface);
+		mPiView = new Pi_View(getApplicationContext());
+		mSurfaceView.addView(mPiView);
+			
+
         //imgv = (ImageView)findViewById(R.id.imageView1);
         //imgv2 = (ImageView)findViewById(R.id.imageView2);
-        
+		
         metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		display_width=metrics.widthPixels;
 		display_height=metrics.heightPixels;
 		Log.i("Display " ,"width : " + display_width + " height : " +  display_height);
-        
-//        mHandler = new MyHandler();
-        Converting = new jniconvert();
 
-        // and start thread to do networking
         outputThread.start();
         openInputSocket.start();
         mouseOutputThread.start();
-        //inputThread.start();
-    }
+	}
+	
+	
+	/* Show Keyboard */
+	private void showCustomKeyboard(){
+		mMyKeyboard.setVisibility(View.VISIBLE);
+	}
+
+	/* Hide Keyboard */
+	private void goneCustomKeyboard() {
+		mMyKeyboard.setVisibility(View.GONE);
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		switch (keyCode){
+		
+		// 메뉴 버튼 눌렀을때 키보드 뜨게 하기
+		case KeyEvent.KEYCODE_VOLUME_DOWN:
+			Log.d("MainAcitivy", "Menu btn");
+			showCustomKeyboard();
+			if(!isKeyboard){
+				showCustomKeyboard();
+				isKeyboard=true;
+			}
+			else {
+				goneCustomKeyboard();
+				isKeyboard=false;
+			}
+			
+			break;
+		default:
+			Log.d("MainAcitivy", "other btn");
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		
+	}	
+	
 
 Thread openInputSocket = new Thread(new Runnable() {
 	
@@ -137,6 +178,8 @@ Thread openInputSocket = new Thread(new Runnable() {
 		try {
 			serverAddr = InetAddress.getByName(SERVERIP);
 			clientSocket = new DatagramSocket();
+			
+			mMyKeyboard.setSocket(serverAddr, clientSocket, Converting);
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -310,5 +353,6 @@ public class MyHandler extends Handler {
 					}
 				}
 			}
-		});	
+		});
+
 }

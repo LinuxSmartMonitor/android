@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:background="@android:color/transparent"
+    android:layout_height="fill_parent">
+    
+    <FrameLayout
+        android:id="@+id/surface"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@android:color/transparent" >
+    </FrameLayout>
+
+    <View
+        android:background="@android:color/transparent"
+        android:id="@+id/touchview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <samjung.pimonitor.com.MyKeyboard
+        android:id="@+id/my_keyboard"
+        android:layout_gravity="bottom"
+        android:background="@android:color/transparent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:keyPreviewLayout="@layout/preview">
+    </samjung.pimonitor.com.MyKeyboard>
+
+</FrameLayout>

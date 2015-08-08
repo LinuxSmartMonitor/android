@@ -1,14 +1,9 @@
 package samjung.pimonitor.com;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.Display;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
