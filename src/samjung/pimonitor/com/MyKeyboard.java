@@ -15,11 +15,12 @@ import android.util.Log;
 class MyKeyboard extends KeyboardView {
 
 	/* Keyboard */
-	private MyKeyboardActionListener engKey;
-	private Keyboard eng = null;
+	private MyKeyboardActionListener engKey, engCapKey, hanKey, hanCapKey, funKey;
+	private Keyboard eng = null, engCap = null, han = null, hanCap = null, fun = null;
 	boolean keyboardCheck = false;
 	public static int mKeyCode = 0;
 	private String state;
+	private String before;
 	
 	/* Socket */
     public static String SERVERIP;
@@ -35,6 +36,10 @@ class MyKeyboard extends KeyboardView {
 		super(context, attrs);
 		this.context = context;
 		eng = new Keyboard(context, R.xml.custom_key);
+		engCap = new Keyboard(context, R.xml.custom_cap_key);
+		han = new Keyboard(context, R.xml.custom_han_key);
+		hanCap = new Keyboard(context, R.xml.custom_han_cap_key);
+		fun = new Keyboard(context, R.xml.function_key);
 	}
 	
 	/* Socket Setting */
@@ -53,6 +58,38 @@ class MyKeyboard extends KeyboardView {
 		engKey = new MyKeyboardActionListener(act);
 		this.setOnKeyboardActionListener(engKey);
 		this.setKeyboard(eng);
+	}
+	
+	public void setActionListenerEngCapKeyboard(Activity act) {
+		state = "EngCap";
+		this.clearFocus();
+		engCapKey = new MyKeyboardActionListener(act);
+		this.setOnKeyboardActionListener(engCapKey);
+		this.setKeyboard(engCap);
+	}
+	
+	public void setActionListenerHanKeyboard(Activity act) {
+		state = "Han";
+		this.clearFocus();
+		hanKey = new MyKeyboardActionListener(act);
+		this.setOnKeyboardActionListener(hanKey);
+		this.setKeyboard(han);
+	}
+	
+	public void setActionListenerHanCapKeyboard(Activity act) {
+		state = "HanCap";
+		this.clearFocus();
+		hanCapKey = new MyKeyboardActionListener(act);
+		this.setOnKeyboardActionListener(hanCapKey);
+		this.setKeyboard(hanCap);
+	}
+	
+	public void setActionListenerFunKeyboard(Activity act) {
+		state = "Fun";
+		this.clearFocus();
+		funKey = new MyKeyboardActionListener(act);
+		this.setOnKeyboardActionListener(funKey);
+		this.setKeyboard(fun);
 	}
 	
 	
@@ -93,6 +130,8 @@ class MyKeyboard extends KeyboardView {
 		final static int ARROW_RIGHT = -10;
 		final static int CHANGE_KEYBOARD = -11;
 		
+		final static int FUNCTION_KEY = -15;
+		
 		private boolean caps = false;
 		private boolean change = false;
 		Activity owner;
@@ -108,26 +147,56 @@ class MyKeyboard extends KeyboardView {
 			Log.d("MyKeyboard", "onKey");
 			int temp = 0;
 
-			/* if primaryCode is negative, key code is function key */
-		    if( primaryCode < 0) {						
-		    	temp = Math.abs(primaryCode) + 200;
-		    	mKeyCode = mapping[temp];
-		    	keyboardCheck = true;
-		    }
-		    
-			/* if primaryCode is 97-122, key code is capital key */
-		    else if ( caps && (primaryCode>=97) && (primaryCode<=122)) {
-		    	temp = primaryCode+300;
-		    	mKeyCode = mapping[temp];	
-		    	keyboardCheck = true;
-		    }
-		    
-			/* else key code */
-		    else {
-		    	temp = primaryCode;
-		    	mKeyCode = mapping[temp]; 
-		    	keyboardCheck = true;	    	
-		    }
+			// Function Key
+			if(primaryCode==FUNCTION_KEY){
+				//setActionListenerFunKeyboard(owner);
+				//before = state;
+				return;
+			}
+			
+			// Key
+				/* if primaryCode is negative, key code is function key */
+			    if( primaryCode < 0) {						
+			    	temp = Math.abs(primaryCode) + 200;
+			    	mKeyCode = mapping[temp];
+			    	
+			    	// Shift Key
+			    	if(mKeyCode==58){
+			    		if(state.compareTo("Eng")==0)
+			    			setActionListenerEngCapKeyboard(owner);
+			    		else if(state.compareTo("EngCap")==0)
+			    			setActionListenerEngKeyboard(owner);
+			    		else if(state.compareTo("Han")==0)
+			    			setActionListenerHanCapKeyboard(owner);
+			    		else if(state.compareTo("HanCap")==0)
+			    			setActionListenerHanKeyboard(owner);
+			    	}
+			    	
+			    	// ENG/KOR Key
+			    	if(mKeyCode==122){
+			    		if(state.compareTo("Eng")==0 || state.compareTo("EngCap")==0)
+			    			setActionListenerHanKeyboard(owner);
+			    		else if(state.compareTo("Han")==0 || state.compareTo("HanCap")==0)
+			    			setActionListenerEngKeyboard(owner);
+			    	}
+			    	keyboardCheck = true;
+			    }
+			    
+				/* if primaryCode is 97-122, key code is capital key */
+			    else if ( caps && (primaryCode>=97) && (primaryCode<=122)) {
+			    	temp = primaryCode+300;
+			    	mKeyCode = mapping[temp];	
+			    	keyboardCheck = true;
+			    }
+			    
+				/* else key code */
+			    else {
+			    	temp = primaryCode;
+			    	mKeyCode = mapping[temp]; 
+			    	keyboardCheck = true;	    	
+			    }
+			    
+			    Log.d("MyKeyboard", "onKey: " + mKeyCode);
 		}
 		
 		
@@ -174,69 +243,76 @@ class MyKeyboard extends KeyboardView {
 			mapping[121] = 21;	
 			mapping[122] = 44;
 			
-			/* capital A-Z */
-			mapping[397] = 318;
-			mapping[398] = 335;	
-			mapping[399] = 333;	
-			mapping[400] = 320;
-			mapping[401] = 316;	
-			mapping[402] = 321;
-			mapping[403] = 322;
-			mapping[404] = 323;
-			mapping[405] = 311;
-			mapping[406] = 324;
-			mapping[407] = 325;
-			mapping[408] = 326;
-			mapping[409] = 337;
-			mapping[410] = 336;
-			mapping[411] = 312;	
-			mapping[412] = 313;	
-			mapping[413] = 314;	
-			mapping[414] = 317;	
-			mapping[415] = 319;	
-			mapping[416] = 318;	
-			mapping[417] = 310;
-			mapping[418] = 334;	
-			mapping[419] = 315;
-			mapping[420] = 332;	
-			mapping[421] = 319;	
-			mapping[422] = 331;
+			// Negative Function Key Setting
+			mapping[203] = 15;	// TAB		-3
+			mapping[205] = 58;	// CAPS		-5
+			mapping[206] = 42;	// SHIFT	-6
+			mapping[201] = 1;	// ESC		-1
+			mapping[211] = 29;	// CTRL		-11
+			mapping[213] = 57;	// SPACE	-13
+			mapping[212] = 56;	// ALT		-12
+			mapping[204] = 28;	// ENTER	-4
+			mapping[202] = 158;	// BACK		-2
+			mapping[214] = 122;	// 한영		-14
 			
+			mapping[207] = 103;	// UP		-7
+			mapping[209] = 108;	// DOWN		-9
+			mapping[208] = 105;	// LEFT		-8
+			mapping[210] = 106;	// RIGHT	-10
+			// until -19
 			
-			// 다시 수정
-			mapping[27] = 15;	// TAB		// Android 다시 수정
-			mapping[27] = 58;	// CAPS		// Android 다시 수정
-			mapping[27] = 42;	// SHIFT	// Android 다시 수정	
+			mapping[220] = 59;	// F1	-20
+			mapping[221] = 60;	// F2	-21
+			mapping[222] = 61;	// F3	-22
+			mapping[223] = 62;	// F4	-23
+			mapping[224] = 63;	// F5	-24
+			mapping[225] = 64;	// F6	-25
+			mapping[226] = 65;	// F7	-26
+			mapping[227] = 66;	// F8	-27
+			mapping[228] = 67;	// F9	-28
+			mapping[229] = 68;	// F10	-29
+			mapping[230] = 87;	// F11	-30
+			mapping[231] = 88;	// F12	-31
 			
-			// Negative Function Key Setting (~200)
-			mapping[204] = 28;	// ENTER
-			mapping[205] = 158;	// BACK
-			mapping[205] = 111;	// DELETE
-			mapping[211] = 122;	// 한영
-			
-			mapping[207] = 103;	// ↑
-			mapping[208] = 105;	// ←
-			mapping[209] = 108;	// ↓
-			mapping[210] = 106;	// →
-			mapping[206] = 158;	// ?
-			
-			// 특수문자 -> Android는 마이너스값으로 바꾸기
-			// 일단보류
+			// function
 			mapping[300] = 300;	// !
-			mapping[300] = 301;	// @
-			mapping[300] = 302;	// #
-			mapping[300] = 303;	// $
-			mapping[300] = 304;	// %
-			mapping[300] = 305;	// ^
-			mapping[300] = 306;	// &
-			mapping[300] = 307;	// *
-			mapping[300] = 308;	// (
-			mapping[300] = 309;	// )
+			mapping[301] = 301;	// @
+			mapping[302] = 302;	// #
+			mapping[303] = 303;	// $
+			mapping[304] = 304;	// %
+			mapping[305] = 305;	// ^
+			mapping[306] = 306;	// &
+			mapping[307] = 307;	// *
+			mapping[308] = 308;	// (
+			mapping[309] = 309;	// )
+			mapping[310] = 310;	// -
+			mapping[311] = 311;	// +
+			
+			mapping[312] = 312;	// '
+			mapping[313] = 313;	// ~
+			mapping[314] = 314;	// _
+			mapping[315] = 315;	// =
+			mapping[316] = 316;	// \
+			mapping[317] = 317;	// |
+			mapping[318] = 318;	// {
+			mapping[319] = 319;	// }
+			mapping[320] = 320;	// [
+			mapping[321] = 321;	// ]
+			mapping[322] = 322;	// :
+			mapping[323] = 323;	// ;
+			
+			mapping[324] = 324;	// "
+			mapping[325] = 325;	// '
+			mapping[326] = 326;	// <
+			mapping[327] = 327;	// >
+			mapping[328] = 328;	// ?
+			mapping[329] = 329;	// ,
+			mapping[330] = 330;	// .
+			mapping[331] = 331;	// /
+			
+			
 
-			mapping[27] = 1;	// ESC
-			mapping[21] = 29;	// CTRL
-			mapping[32] = 57;	// SPACE
-			mapping[47] = 56;	// ALT
+
 		}
 
 

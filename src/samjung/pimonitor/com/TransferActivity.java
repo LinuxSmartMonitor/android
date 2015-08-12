@@ -140,8 +140,8 @@ public class TransferActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (keyCode){
 		
-		// 메뉴 버튼 눌렀을때 키보드 뜨게 하기
-		case KeyEvent.KEYCODE_VOLUME_DOWN:
+		// MENU BTN
+		case KeyEvent.KEYCODE_MENU:
 			Log.d("MainAcitivy", "Menu btn");
 			showCustomKeyboard();
 			if(!isKeyboard){
@@ -152,7 +152,12 @@ public class TransferActivity extends Activity implements OnClickListener {
 				goneCustomKeyboard();
 				isKeyboard=false;
 			}
+			break;
 			
+		// 투명성 적용
+		case KeyEvent.KEYCODE_VOLUME_DOWN:
+			break;
+		case KeyEvent.KEYCODE_VOLUME_UP:
 			break;
 		default:
 			Log.d("MainAcitivy", "other btn");
@@ -191,6 +196,8 @@ Thread openInputSocket = new Thread(new Runnable() {
 	}
 });
 
+
+// 이거 쓰레드 누가 씀? 안쓰면 지우기
 Thread inputThread = new Thread(new Runnable() {
 	
 	@Override
@@ -199,15 +206,8 @@ Thread inputThread = new Thread(new Runnable() {
 		while(true)
 		{
             byte[] sendData = new byte[3072];
-        
 		//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
             sendData = Converting.jniConvert(321, 15, 3);
-            
-//            DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-//            dos.
-          
-            //Log.d("CONVERTED", Integer.sendData + " " + (int)sendData>>1024 + " " + (int)sendData >> 2048);
-            
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
             try {
 				clientSocket.send(sendPacket);

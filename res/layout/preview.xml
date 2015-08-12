@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:background="@android:color/transparent"
-    android:textStyle="bold"
-    android:textSize="30sp"
+    android:textSize="20sp"
     >    
 </TextView>
