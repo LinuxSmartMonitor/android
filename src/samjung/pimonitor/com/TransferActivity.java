@@ -24,6 +24,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
+import com.example.android.wifidirect.DeviceListFragment;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -45,10 +47,9 @@ public class TransferActivity extends Activity implements OnClickListener {
 	public float minX=2000, minY=2000, maxX=0, maxY=0;
 	int mouse_x = 0, mouse_y = 0;
 
-    public static final String SERVERIP = "192.168.49.164";
+    public static final String SERVERIP = "192.168.49.132";
     public static final int SERVERPORT_OUT = 3490;
     public static final int SERVERPORT_IN = 3491;
-    
     public String message;
     int height = 384;
     int width = 512;
@@ -109,10 +110,6 @@ public class TransferActivity extends Activity implements OnClickListener {
 		mPiView = new Pi_View(getApplicationContext());
 		mSurfaceView.addView(mPiView);
 			
-
-        //imgv = (ImageView)findViewById(R.id.imageView1);
-        //imgv2 = (ImageView)findViewById(R.id.imageView2);
-		
         metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		display_width=metrics.widthPixels;
@@ -140,8 +137,8 @@ public class TransferActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (keyCode){
 		
-		// 메뉴 버튼 눌렀을때 키보드 뜨게 하기
-		case KeyEvent.KEYCODE_VOLUME_DOWN:
+		// MENU BTN
+		case KeyEvent.KEYCODE_MENU:
 			Log.d("MainAcitivy", "Menu btn");
 			showCustomKeyboard();
 			if(!isKeyboard){
@@ -152,7 +149,12 @@ public class TransferActivity extends Activity implements OnClickListener {
 				goneCustomKeyboard();
 				isKeyboard=false;
 			}
+			break;
 			
+		// 투명성 적용
+		case KeyEvent.KEYCODE_VOLUME_DOWN:
+			break;
+		case KeyEvent.KEYCODE_VOLUME_UP:
 			break;
 		default:
 			Log.d("MainAcitivy", "other btn");
@@ -191,6 +193,8 @@ Thread openInputSocket = new Thread(new Runnable() {
 	}
 });
 
+
+// 이거 쓰레드 누가 씀? 안쓰면 지우기
 Thread inputThread = new Thread(new Runnable() {
 	
 	@Override
@@ -199,15 +203,8 @@ Thread inputThread = new Thread(new Runnable() {
 		while(true)
 		{
             byte[] sendData = new byte[3072];
-        
 		//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
             sendData = Converting.jniConvert(321, 15, 3);
-            
-//            DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
-//            dos.
-          
-            //Log.d("CONVERTED", Integer.sendData + " " + (int)sendData>>1024 + " " + (int)sendData >> 2048);
-            
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
             try {
 				clientSocket.send(sendPacket);
@@ -225,11 +222,11 @@ Thread outputThread = new Thread(new Runnable() {
 	@Override
 	public void run() {
 		
-		DatagramSocket clientSocket = null;
-		 InetAddress serverAddr = null;
+		DatagramSocket outclientSocket = null;
+		 InetAddress outserverAddr = null;
 		try {
-			serverAddr = InetAddress.getByName(SERVERIP);
-			clientSocket = new DatagramSocket();
+			outserverAddr = InetAddress.getByName(SERVERIP);
+			outclientSocket = new DatagramSocket();
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -239,22 +236,25 @@ Thread outputThread = new Thread(new Runnable() {
 		}
 	        
 		 // send message to Pi
-		
-        byte[] sendData = new byte[2];
-    
-        String sentence = "1";
-        sendData = sentence.getBytes();
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_OUT);
-        try {
-			clientSocket.send(sendPacket);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}   
+		Log.d("DEVICELIST",""+DeviceListFragment.notfirstflag);
+		if(DeviceListFragment.notfirstflag == true)
+		{
+	        byte[] outsendData = new byte[1];
+	        outsendData[0] = 9;
+	        DatagramPacket sendPacket = new DatagramPacket(outsendData, 1, outserverAddr, SERVERPORT_OUT);
+				 try {
+					 outclientSocket.send(sendPacket);
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}  
+				 Log.d("DEVICELIST","First Send");
+		}
         
        	bufferOut = new byte[49152*8];
 		while(true)
 		{
+			
 			//bitmap=null;
 			int ou=0;
 			for(int i=0; i<8; i++){
@@ -262,21 +262,16 @@ Thread outputThread = new Thread(new Runnable() {
 	
 			            // get reply back from Pi
 							
-						  byte[] receiveData1 = new byte[49152];
+						  byte[] outreceiveData1 = new byte[49152];
 				            
-				            DatagramPacket receivePacket = new DatagramPacket(receiveData1, 49152);
-				            clientSocket.receive(receivePacket);
+				            DatagramPacket outreceivePacket = new DatagramPacket(outreceiveData1, 49152);
+				            outclientSocket.receive(outreceivePacket);
 				           
-				            System.arraycopy(receiveData1, 
+				            System.arraycopy(outreceiveData1, 
 				                    0,
 				                    bufferOut,
-				                    receiveData1[0]*49152,
+				                    outreceiveData1[0]*49152,
 				                    49152);
-				           /* System.arraycopy(receiveData1, 
-				                    0,
-				                    bufferOut,
-				                    i*49152,
-				                    49152);*/
 			        } 
 			        catch (Exception e) {
 			            e.printStackTrace();
@@ -290,24 +285,7 @@ Thread outputThread = new Thread(new Runnable() {
 		}
 });
 
-/*
-public class MyHandler extends Handler {
-	@Override
-	public void handleMessage(Message msg) {
 
-		if(swit == 0)
-		{
-			imgv.setImageBitmap(bitmap);
-			swit = -1;
-		}
-		else
-		{
-			imgv2.setImageBitmap(bitmap);
-			swit = 0;
-		}
-	}
-}
-*/
 		// Mouse Touch Listener.
 		// screen Min X value = 11, Min Y value = 14.
 		View.OnTouchListener mViewTouchListener = new View.OnTouchListener() {
@@ -343,6 +321,7 @@ public class MyHandler extends Handler {
 				            sendData = Converting.jniConvert(512 * mouse_x / (display_width - 25), 384 * mouse_y / (display_height - 28), mouse_value);
 				            Log.d("PiMonitor", "Change Coord //  x : " + (512 * mouse_x / (display_width - 25)) + " y : " + (384 * mouse_y / (display_height - 28)) );
 				            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
+				            
 				            try {
 								clientSocket.send(sendPacket);
 							} catch (IOException e1) {
