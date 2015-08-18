@@ -24,14 +24,13 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
-import com.example.android.wifidirect.DeviceListFragment;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -41,15 +40,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
+import com.example.android.wifidirect.DeviceListFragment;
+
 public class TransferActivity extends Activity implements OnClickListener {
 	
 	public boolean clickflag =false;
 	public float minX=2000, minY=2000, maxX=0, maxY=0;
 	int mouse_x = 0, mouse_y = 0;
-
+	Handler sendhandle;
     public static final String SERVERIP = "192.168.49.132";
     public static final int SERVERPORT_OUT = 3490;
     public static final int SERVERPORT_IN = 3491;
+    boolean paused = false;
     public String message;
     int height = 384;
     int width = 512;
@@ -57,9 +59,7 @@ public class TransferActivity extends Activity implements OnClickListener {
     public static DatagramSocket clientSocket;
     public static InetAddress serverAddr;
     public static Bitmap bitmap;
-    //ImageView imgv;
-    //ImageView imgv2;
-    Handler mHandler;
+ 
     byte[] bufferOut;
     jniconvert Converting;
     int swit = 0;
@@ -85,7 +85,7 @@ public class TransferActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        sendhandle = new MyHandler();
         // Get the message that the user entered. 
         Intent intent = getIntent();
         message = "Hello, Echo?";
@@ -120,8 +120,42 @@ public class TransferActivity extends Activity implements OnClickListener {
         openInputSocket.start();
         mouseOutputThread.start();
 	}
+	/*
+	@Override protected void onResume() {
+	    super.onResume();
+	    
+	    Log.d("WiFiDirectStop","Resume!");
+	    if(DeviceListFragment.notfirstflag == false)
+	    {
+	    	sendhandle.sendMessage(sendhandle.obtainMessage(1, 0, 0, 0));
+	    	
+	    }
+	 
+	 }*/
+	/*
+	@Override protected void onPause() {
+	    super.onPause();
+	    
+	    Log.d("WiFiDirectStop","Paused!");
+	    paused = true;
+	    
+	 }*/
 	
-	
+	public class MyHandler extends Handler {
+	@Override
+	public void handleMessage(Message msg) {
+		byte[] sendData = new byte[3072];
+	    sendData = Converting.jniConvert(999, 999, 999);
+	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
+	    try {
+			clientSocket.send(sendPacket);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}   
+	}
+}
+	    
 	/* Show Keyboard */
 	private void showCustomKeyboard(){
 		mMyKeyboard.setVisibility(View.VISIBLE);
@@ -237,8 +271,8 @@ Thread outputThread = new Thread(new Runnable() {
 	        
 		 // send message to Pi
 		Log.d("DEVICELIST",""+DeviceListFragment.notfirstflag);
-		if(DeviceListFragment.notfirstflag == true)
-		{
+		//if(DeviceListFragment.notfirstflag == true)
+		//{
 	        byte[] outsendData = new byte[1];
 	        outsendData[0] = 9;
 	        DatagramPacket sendPacket = new DatagramPacket(outsendData, 1, outserverAddr, SERVERPORT_OUT);
@@ -249,7 +283,7 @@ Thread outputThread = new Thread(new Runnable() {
 						e1.printStackTrace();
 					}  
 				 Log.d("DEVICELIST","First Send");
-		}
+		//}
         
        	bufferOut = new byte[49152*8];
 		while(true)
@@ -279,8 +313,8 @@ Thread outputThread = new Thread(new Runnable() {
 				}
 				bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 				bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(( bufferOut )));
-				//mHandler.sendMessage(mHandler.obtainMessage(1, 0, 0, 0));
-			}
+				
+		}
 			
 		}
 });

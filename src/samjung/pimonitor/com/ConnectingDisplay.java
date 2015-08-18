@@ -1,5 +1,6 @@
 package samjung.pimonitor.com;
 
+import com.example.android.wifidirect.DeviceListFragment;
 import com.example.android.wifidirect.WiFiDirectActivity;
 
 import android.app.Activity;
@@ -12,15 +13,15 @@ import android.widget.ImageButton;
 
 public class ConnectingDisplay extends Activity {
 
-	Handler mHandler;
-	Runnable mRunnable;
+	Handler msHandler;
+	Runnable msRunnable;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.connectingdisp);
 		
-		mRunnable = new Runnable() {
+		msRunnable = new Runnable() {
 	        @Override
 	        public void run() {
 	        	
@@ -29,8 +30,11 @@ public class ConnectingDisplay extends Activity {
 				finish();
 	        }
 	    };
-	    mHandler = new Handler();
-	    mHandler.postDelayed(mRunnable, 5000);
+	    msHandler = new Handler();
+	    if(DeviceListFragment.notfirstflag == false)
+	    	msHandler.postDelayed(msRunnable, 500);
+	    else
+	    	msHandler.postDelayed(msRunnable, 10000);
 	   
 	}
 	
