@@ -29,7 +29,7 @@ public class ConnectingDisplay extends Activity {
 				startActivity(intent);
 				finish();
 	        }
-	    };
+	    }; 
 	    msHandler = new Handler();
 	    if(DeviceListFragment.notfirstflag == false)
 	    	msHandler.postDelayed(msRunnable, 500);

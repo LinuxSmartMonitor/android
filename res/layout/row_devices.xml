@@ -5,7 +5,7 @@
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:padding="6dip">
-    <ImageView
+    <ImageView 
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"

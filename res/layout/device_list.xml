@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:text="@string/label_me" />
-    <View
+    <View 
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:gravity="center_vertical"

@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import samjung.pimonitor.com.R;
-
+ 
 /**
  * A ListFragment that displays available peers on discovery and requests the
  * parent activity to handle user interaction events
