@@ -1,0 +1,76 @@
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:keyWidth="10%p"
+    android:horizontalGap="0px"
+    android:verticalGap="0px"  
+    android:keyHeight="8%p"
+>
+
+    <!-- Number key value -->
+    
+    <Row>
+        <Key android:codes="-1" android:keyLabel="ESC" android:keyWidth="9%p" android:keyEdgeFlags="left" />
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="8%p"/>
+        <Key android:codes="50" android:keyLabel="2" android:keyWidth="8%p"/>
+        <Key android:codes="51" android:keyLabel="3" android:keyWidth="8%p"/>
+        <Key android:codes="52" android:keyLabel="4" android:keyWidth="8%p"/>
+        <Key android:codes="53" android:keyLabel="5" android:keyWidth="8%p"/>
+        <Key android:codes="54" android:keyLabel="6" android:keyWidth="8%p"/>
+        <Key android:codes="55" android:keyLabel="7" android:keyWidth="8%p"/>
+        <Key android:codes="56" android:keyLabel="8" android:keyWidth="8%p"/>
+        <Key android:codes="57" android:keyLabel="9" android:keyWidth="8%p"/>
+        <Key android:codes="48" android:keyLabel="0" android:keyWidth="8%p"/>
+        <Key android:codes="-2" android:keyLabel="BACK" android:keyEdgeFlags="right"/>
+    </Row>
+    
+    <Row>
+        <Key android:codes="-3" android:keyLabel="Tab" android:keyWidth="9%p" android:keyEdgeFlags="left"/>
+        <Key android:codes="113" android:keyLabel="ㅂ" android:keyWidth="8%p" />
+        <Key android:codes="119" android:keyLabel="ㅈ" android:keyWidth="8%p" />
+        <Key android:codes="101" android:keyLabel="ㄷ" android:keyWidth="8%p" />
+        <Key android:codes="114" android:keyLabel="ㄱ" android:keyWidth="8%p" />
+        <Key android:codes="116" android:keyLabel="ㅅ" android:keyWidth="8%p" />
+        <Key android:codes="121" android:keyLabel="ㅛ" android:keyWidth="8%p" />
+        <Key android:codes="117" android:keyLabel="ㅕ" android:keyWidth="8%p" />
+        <Key android:codes="105" android:keyLabel="ㅑ" android:keyWidth="8%p" />
+        <Key android:codes="111" android:keyLabel="ㅐ" android:keyWidth="8%p" />
+        <Key android:codes="112" android:keyLabel="ㅔ" android:keyWidth="8%p" />
+        <Key android:codes="-4" android:keyLabel="Enter" android:keyEdgeFlags="right" />
+    </Row>
+    
+    <Row>
+        <Key android:codes="-5" android:keyLabel="CAPS" android:keyWidth="9%p" android:keyEdgeFlags="left"/>
+        <Key android:codes="97" android:keyLabel="ㅁ" android:keyWidth="8%p"/>
+        <Key android:codes="115" android:keyLabel="ㄴ" android:keyWidth="8%p"/>
+        <Key android:codes="100" android:keyLabel="ㅇ" android:keyWidth="8%p"/>
+        <Key android:codes="102" android:keyLabel="ㄹ" android:keyWidth="8%p"/>
+        <Key android:codes="103" android:keyLabel="ㅎ" android:keyWidth="8%p"/>
+        <Key android:codes="104" android:keyLabel="ㅗ" android:keyWidth="8%p"/>
+        <Key android:codes="106" android:keyLabel="ㅓ" android:keyWidth="8%p"/>
+        <Key android:codes="107" android:keyLabel="ㅏ" android:keyWidth="8%p"/>       
+        <Key android:codes="108" android:keyLabel="ㅣ" android:keyWidth="8%p"/>
+    </Row>
+    
+    <Row>
+        <Key android:codes="-6" android:keyLabel="SHIFT" android:keyWidth="11%p" android:keyEdgeFlags="left"/>
+        <Key android:codes="122" android:keyLabel="ㅋ" android:keyWidth="8%p"/>
+        <Key android:codes="120" android:keyLabel="ㅌ" android:keyWidth="8%p"/>
+        <Key android:codes="99" android:keyLabel="ㅊ" android:keyWidth="8%p"/>
+        <Key android:codes="118" android:keyLabel="ㅍ" android:keyWidth="8%p"/>
+        <Key android:codes="98" android:keyLabel="ㅠ" android:keyWidth="8%p"/>
+        <Key android:codes="110" android:keyLabel="ㅜ" android:keyWidth="8%p"/>
+        <Key android:codes="109" android:keyLabel="ㅡ" android:keyWidth="8%p" />
+        <Key android:codes="-7" android:keyLabel="▲" android:keyWidth="7%p" android:horizontalGap="20%p"/>
+    </Row>
+    
+    <!-- ctrl, alt, tab should modify android code -->
+    <Row android:rowEdgeFlags="bottom">
+        <Key android:codes="-11" android:keyLabel="Ctrl" android:keyWidth="7%p" android:keyEdgeFlags="left"/>   
+        <Key android:codes="-12" android:keyLabel="Alt" android:keyWidth="7%p"/>
+        <Key android:codes="-13" android:keyLabel="SPACE" android:keyWidth="45%p"/>        
+        <Key android:codes="-14" android:keyLabel="한/영" android:keyWidth="7%p" />
+        <Key android:codes="-15" android:keyLabel="기호" android:keyWidth="7%p"/>
+        <Key android:codes="-8" android:keyLabel="◀" android:keyWidth="7%p" android:horizontalGap="6%p"/>
+        <Key android:codes="-9" android:keyLabel="▼" android:keyWidth="7%p"/>
+        <Key android:codes="-10" android:keyLabel="▶" android:keyWidth="7%p"/>
+    </Row>    
+</Keyboard>

@@ -20,9 +20,11 @@
     <samjung.pimonitor.com.MyKeyboard
         android:id="@+id/my_keyboard"
         android:layout_gravity="bottom"
-        android:background="@android:color/transparent"
+        android:background="#696969"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:keyTextColor="#696969"
+        android:keyBackground="@xml/keycolor"
         android:keyPreviewLayout="@layout/preview">
     </samjung.pimonitor.com.MyKeyboard>
 
