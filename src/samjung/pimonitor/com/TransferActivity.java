@@ -16,10 +16,14 @@
 
 package samjung.pimonitor.com;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -29,8 +33,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -40,15 +42,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
-import com.example.android.wifidirect.DeviceListFragment;
+import com.example.android.wifidirect.WiFiDirectActivity;
 
 public class TransferActivity extends Activity implements OnClickListener {
 	
 	public boolean clickflag =false;
 	public float minX=2000, minY=2000, maxX=0, maxY=0;
 	int mouse_x = 0, mouse_y = 0;
-	Handler sendhandle;
-    public static final String SERVERIP = "192.168.49.132";
     public static final int SERVERPORT_OUT = 3490;
     public static final int SERVERPORT_IN = 3491;
     boolean paused = false;
@@ -56,10 +56,12 @@ public class TransferActivity extends Activity implements OnClickListener {
     int height = 384;
     int width = 512;
     int n=0;
-    public static DatagramSocket clientSocket;
-    public static InetAddress serverAddr;
+    public static ServerSocket inclientSocket;
+    public static Socket inclientsock;
     public static Bitmap bitmap;
- 
+    public static DataOutputStream is;
+    
+    
     byte[] bufferOut;
     jniconvert Converting;
     int swit = 0;
@@ -85,7 +87,6 @@ public class TransferActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sendhandle = new MyHandler();
         // Get the message that the user entered. 
         Intent intent = getIntent();
         message = "Hello, Echo?";
@@ -120,41 +121,7 @@ public class TransferActivity extends Activity implements OnClickListener {
         openInputSocket.start();
         mouseOutputThread.start();
 	}
-	/*
-	@Override protected void onResume() {
-	    super.onResume();
-	    
-	    Log.d("WiFiDirectStop","Resume!");
-	    if(DeviceListFragment.notfirstflag == false)
-	    {
-	    	sendhandle.sendMessage(sendhandle.obtainMessage(1, 0, 0, 0));
-	    	
-	    }
-	 
-	 }*/
-	/* 
-	@Override protected void onPause() {
-	    super.onPause();
-	    
-	    Log.d("WiFiDirectStop","Paused!");
-	    paused = true;
-	    
-	 }*/
-	
-	public class MyHandler extends Handler {
-	@Override
-	public void handleMessage(Message msg) {
-		byte[] sendData = new byte[3072];
-	    sendData = Converting.jniConvert(999, 999, 999);
-	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
-	    try {
-			clientSocket.send(sendPacket);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}   
-	}
-}
+
 	    
 	/* Show Keyboard */
 	private void showCustomKeyboard(){
@@ -209,17 +176,23 @@ Thread openInputSocket = new Thread(new Runnable() {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		clientSocket = null;
-		serverAddr = null;
+		Log.d("TCP", "S: Connecting...");
+        
+		inclientSocket = null;
 		try {
-			serverAddr = InetAddress.getByName(SERVERIP);
-			clientSocket = new DatagramSocket();
-			
-			mMyKeyboard.setSocket(serverAddr, clientSocket, Converting);
+			inclientSocket = new ServerSocket(SERVERPORT_IN);
+			inclientsock = inclientSocket.accept();
+			Log.d(WiFiDirectActivity.TAG, "Server: connection done");
+			OutputStream tmp = inclientsock.getOutputStream();
+			is = new DataOutputStream(tmp);
+			mMyKeyboard.setSocket(is, Converting);
 		} catch (UnknownHostException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -227,64 +200,32 @@ Thread openInputSocket = new Thread(new Runnable() {
 	}
 });
 
-
-// 이거 쓰레드 누가 씀? 안쓰면 지우기
-Thread inputThread = new Thread(new Runnable() {
-	
-	@Override
-	public void run() {
-		// send message to Pi
-		while(true)
-		{
-            byte[] sendData = new byte[3072];
-		//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
-            sendData = Converting.jniConvert(321, 15, 3);
-            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
-            try {
-				clientSocket.send(sendPacket);
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}   
-		}
-	}
-});
 
 
 Thread outputThread = new Thread(new Runnable() {
 	
 	@Override
 	public void run() {
-		
-		DatagramSocket outclientSocket = null;
-		 InetAddress outserverAddr = null;
-		try {
-			outserverAddr = InetAddress.getByName(SERVERIP);
-			outclientSocket = new DatagramSocket();
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	        
-		 // send message to Pi
-		Log.d("DEVICELIST",""+DeviceListFragment.notfirstflag);
-		//if(DeviceListFragment.notfirstflag == true)
-		//{
-	        byte[] outsendData = new byte[1];
-	        outsendData[0] = 9;
-	        DatagramPacket sendPacket = new DatagramPacket(outsendData, 1, outserverAddr, SERVERPORT_OUT);
-				 try {
-					 outclientSocket.send(sendPacket);
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}  
-				 Log.d("DEVICELIST","First Send");
-		//}
-        
+
+		 /* Retrieve the ServerName */  
+       InetAddress outserverAddr;
+       DatagramSocket outsocket = null;   
+
+	try {
+		outserverAddr = InetAddress.getByName("192.168.49.1");
+		outsocket = new DatagramSocket(SERVERPORT_OUT, outserverAddr);
+		 Log.d("UDP", "S: Connecting...");   
+	} catch (UnknownHostException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} catch (SocketException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}   
+
+      
+       /* Create new UDP-Socket */  
+      
        	bufferOut = new byte[49152*8];
 		while(true)
 		{
@@ -294,18 +235,18 @@ Thread outputThread = new Thread(new Runnable() {
 			for(int i=0; i<8; i++){
 					try {
 	
-			            // get reply back from Pi
-							
-						  byte[] outreceiveData1 = new byte[49152];
-				            
-				            DatagramPacket outreceivePacket = new DatagramPacket(outreceiveData1, 49152);
-				            outclientSocket.receive(outreceivePacket);
-				           
-				            System.arraycopy(outreceiveData1, 
-				                    0,
-				                    bufferOut,
-				                    outreceiveData1[0]*49152,
-				                    49152);
+			           
+			            byte[] buf = new byte[49152];    
+			            DatagramPacket packet = new DatagramPacket(buf, buf.length);   
+			        
+			            outsocket.receive(packet);   
+			                 
+			            System.arraycopy(buf, 
+			                    0,
+			                    bufferOut,
+			                    buf[0]*49152,
+			                    49152);
+			           
 			        } 
 			        catch (Exception e) {
 			            e.printStackTrace();
@@ -353,11 +294,13 @@ Thread outputThread = new Thread(new Runnable() {
 						mouse_value = 1;
 						//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
 				            sendData = Converting.jniConvert(512 * mouse_x / (display_width - 25), 384 * mouse_y / (display_height - 28), mouse_value);
-				            Log.d("PiMonitor", "Change Coord //  x : " + (512 * mouse_x / (display_width - 25)) + " y : " + (384 * mouse_y / (display_height - 28)) );
-				            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr, SERVERPORT_IN);
+				            //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, inserverAddr, SERVERPORT_IN);
 				            
 				            try {
-								clientSocket.send(sendPacket);
+				            	is.write(sendData);
+								//inclientSocket.send(sendPacket);
+								Log.d("PiMonitor", "Change Coord //  x : " + (512 * mouse_x / (display_width - 25)) + " y : " + (384 * mouse_y / (display_height - 28)) );
+				            
 							} catch (IOException e1) {
 								// TODO Auto-generated catch block
 								e1.printStackTrace();

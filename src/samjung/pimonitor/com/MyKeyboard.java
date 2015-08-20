@@ -1,9 +1,8 @@
 package samjung.pimonitor.com;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,8 +24,8 @@ class MyKeyboard extends KeyboardView {
 	/* Socket */
     public static String SERVERIP;
     public static int SERVERPORT_IN;
-    private InetAddress serverAddr_SUJIN;
-    private DatagramSocket clientSocket_SUJIN;
+    private DataOutputStream is_SUJIN;
+    //private DatagramSocket clientSocket_SUJIN;
   
     /* Else */
     private jniconvert Converting;
@@ -43,11 +42,10 @@ class MyKeyboard extends KeyboardView {
 	}
 	
 	/* Socket Setting */
-	public void setSocket(InetAddress serverAddr, DatagramSocket clientSocket, jniconvert Converting){	
-		this.SERVERIP = TransferActivity.SERVERIP;
+	public void setSocket(DataOutputStream keyin,jniconvert Converting){	
 		this.SERVERPORT_IN = TransferActivity.SERVERPORT_IN;
-		this.serverAddr_SUJIN = serverAddr;
-		this.clientSocket_SUJIN = clientSocket;
+		this.is_SUJIN = keyin;
+		//this.clientSocket_SUJIN = clientSocket;
 		this.Converting = Converting;
 		keyboardOutputThread.start();
 	}
@@ -108,8 +106,9 @@ class MyKeyboard extends KeyboardView {
 					mKeyCode = MyKeyboard.mKeyCode;   
 					sendData = Converting.jniConvert(-1, mKeyCode, -1);
 					try {
-						DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr_SUJIN, SERVERPORT_IN);
-						clientSocket_SUJIN.send(sendPacket);
+						//DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr_SUJIN, SERVERPORT_IN);
+						//clientSocket_SUJIN.send(sendPacket);
+						is_SUJIN.write(sendData);
 					} catch (IOException e1) {
 						Log.d("MyKeyboard", "send error.");
 						e1.printStackTrace();

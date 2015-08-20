@@ -31,10 +31,8 @@ public class ConnectingDisplay extends Activity {
 	        }
 	    }; 
 	    msHandler = new Handler();
-	    if(DeviceListFragment.notfirstflag == false)
-	    	msHandler.postDelayed(msRunnable, 500);
-	    else
-	    	msHandler.postDelayed(msRunnable, 10000);
+	    msHandler.postDelayed(msRunnable, 500);
+
 	   
 	}
 	

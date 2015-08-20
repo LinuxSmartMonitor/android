@@ -57,7 +57,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
     protected static final int CHOOSE_FILE_RESULT_CODE = 20;
     private View mContentView = null;
     private WifiP2pDevice device;
-    private WifiP2pInfo info;
+    public static WifiP2pInfo info;
     ProgressDialog progressDialog = null;
     
 
@@ -151,7 +151,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
         
         
-        /*
+        
         this.info = info;
         this.getView().setVisibility(View.VISIBLE);
 
@@ -180,7 +180,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         }
 
         // hide the connect button
-        mContentView.findViewById(R.id.btn_connect).setVisibility(View.GONE);*/
+        mContentView.findViewById(R.id.btn_connect).setVisibility(View.GONE);
     }
 
     /**
