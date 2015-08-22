@@ -15,7 +15,7 @@ public class ConnectingDisplay extends Activity {
 
 	Handler msHandler;
 	Runnable msRunnable;
-
+ 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

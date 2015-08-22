@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
- 
+  
 /**
  * A service that process each file transfer request i.e Intent by opening a
  * socket connection with the WiFi Direct Group Owner and writing the file

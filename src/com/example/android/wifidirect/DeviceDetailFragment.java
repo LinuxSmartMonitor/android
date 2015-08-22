@@ -47,7 +47,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import samjung.pimonitor.com.R;
- 
+  
 /**
  * A fragment that manages a particular peer and allows interaction with device
  * i.e. setting up network connection and transferring data.

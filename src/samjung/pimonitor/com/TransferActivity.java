@@ -43,7 +43,7 @@ import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
 import com.example.android.wifidirect.WiFiDirectActivity;
-
+ 
 public class TransferActivity extends Activity implements OnClickListener {
 	
 	public boolean clickflag =false;
