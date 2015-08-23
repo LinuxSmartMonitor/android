@@ -24,7 +24,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:keyTextColor="#696969"
-        android:keyBackground="@xml/keycolor"
+        android:keyBackground="@drawable/mykeybackground"
         android:keyPreviewLayout="@layout/preview">
     </samjung.pimonitor.com.MyKeyboard>
 

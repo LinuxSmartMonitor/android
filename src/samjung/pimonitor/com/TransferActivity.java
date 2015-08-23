@@ -43,38 +43,35 @@ import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
 import com.example.android.wifidirect.WiFiDirectActivity;
- 
+
 public class TransferActivity extends Activity implements OnClickListener {
-	
-	public boolean clickflag =false;
-	public float minX=2000, minY=2000, maxX=0, maxY=0;
-	int mouse_x = 0, mouse_y = 0;
-    public static final int SERVERPORT_OUT = 3490;
-    public static final int SERVERPORT_IN = 3491;
-    boolean paused = false;
-    public String message;
-    int height = 384;
-    int width = 512;
-    int n=0;
-    public static ServerSocket inclientSocket;
-    public static Socket inclientsock;
-    public static Bitmap bitmap;
-    public static DataOutputStream is;
-    
-    
-    byte[] bufferOut;
-    jniconvert Converting;
-    int swit = 0;
-    public static DisplayMetrics metrics;
-    public static int display_width,display_height ;
-    
-    // MOUSE ######################## start 1
-    private GestureDetector mDoubleTapGesture;
+
+	public static final int SERVERPORT_OUT = 3490;
+	public static final int SERVERPORT_IN = 3491;
+	public static ServerSocket inclientSocket;
+	public static Socket inclientsock;
+	public static Bitmap bitmap;
+	public static DataOutputStream is;
+	public static DisplayMetrics metrics;
+	public static int display_width, display_height;
+
+	boolean paused = false;
+	public String message;
+	int height = 384;
+	int width = 512;
+	int n = 0;
+	byte[] bufferOut;
+	jniconvert Converting;
+	int swit = 0;
+
+	/* ByeongJae */
+	private GestureDetector mDoubleTapGesture;
 	int x;
 	int y;
 	int mouse_value;
-	// MOUSE ######################## end 1 
-    
+	public boolean clickflag = false;
+	public float minX = 2000, minY = 2000, maxX = 0, maxY = 0;
+	int mouse_x = 0, mouse_y = 0;
 
 	/* SUJIN */
 	private View mView;
@@ -82,49 +79,47 @@ public class TransferActivity extends Activity implements OnClickListener {
 	private Pi_View mPiView;
 	private MyKeyboard mMyKeyboard;
 	private boolean isKeyboard = false;
-	
-   
+	public static float currentAlpha = 1;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Get the message that the user entered. 
-        Intent intent = getIntent();
-        message = "Hello, Echo?";
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        Converting = new jniconvert();
-        // Set the xml file to be activity layout
-        //setContentView(R.layout.displaymessage);
-        
-        
-        /* View Setting */
+		super.onCreate(savedInstanceState);
+		// Get the message that the user entered.
+		Intent intent = getIntent();
+		message = "Hello, Echo?";
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		Converting = new jniconvert();
+
+		/* View Setting */
 		setContentView(R.layout.activity_main);
-		mView = (View)findViewById(R.id.touchview);
-		mView.setOnTouchListener(mViewTouchListener);	
-		
+		mView = (View) findViewById(R.id.touchview);
+		mView.setOnTouchListener(mViewTouchListener);
+		mView.setOnLongClickListener(mViewLongClickListener);
+
 		/* Keyboard Setting */
-		mMyKeyboard = (MyKeyboard)findViewById(R.id.my_keyboard);
+		mMyKeyboard = (MyKeyboard) findViewById(R.id.my_keyboard);
 		mMyKeyboard.setActionListenerEngKeyboard(this);
 		goneCustomKeyboard();
-			
+
 		/* SurfaceView Setting */
-		mSurfaceView = (FrameLayout)findViewById(R.id.surface);
+		mSurfaceView = (FrameLayout) findViewById(R.id.surface);
 		mPiView = new Pi_View(getApplicationContext());
 		mSurfaceView.addView(mPiView);
-			
-        metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		display_width=metrics.widthPixels;
-		display_height=metrics.heightPixels;
-		Log.i("Display " ,"width : " + display_width + " height : " +  display_height);
 
-        outputThread.start();
-        openInputSocket.start();
-        mouseOutputThread.start();
+		metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		display_width = metrics.widthPixels;
+		display_height = metrics.heightPixels;
+		Log.i("Display ", "width : " + display_width + " height : "
+				+ display_height);
+
+		outputThread.start();
+		openInputSocket.start();
+		mouseOutputThread.start();
 	}
 
-	    
 	/* Show Keyboard */
-	private void showCustomKeyboard(){
+	private void showCustomKeyboard() {
 		mMyKeyboard.setVisibility(View.VISIBLE);
 	}
 
@@ -132,183 +127,213 @@ public class TransferActivity extends Activity implements OnClickListener {
 	private void goneCustomKeyboard() {
 		mMyKeyboard.setVisibility(View.GONE);
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
-		switch (keyCode){
-		
+		switch (keyCode) {
+
 		// MENU BTN
 		case KeyEvent.KEYCODE_MENU:
 			Log.d("MainAcitivy", "Menu btn");
 			showCustomKeyboard();
-			if(!isKeyboard){
+			if (!isKeyboard) {
 				showCustomKeyboard();
-				isKeyboard=true;
-			}
-			else {
+				isKeyboard = true;
+			} else {
 				goneCustomKeyboard();
-				isKeyboard=false;
+				isKeyboard = false;
 			}
 			break;
-			
-		// 투명성 적용
+
+		// 롱터치로 변환하기
 		case KeyEvent.KEYCODE_VOLUME_DOWN:
+			// 이거 다시 수정하기
+			currentAlpha -= (float) 0.2;
+			if (currentAlpha <= 0.2) {
+				goneCustomKeyboard();
+				currentAlpha = 0;
+				isKeyboard = false;
+				break;
+			} else {
+				mMyKeyboard.setAlpha(currentAlpha);
+			}
 			break;
+
 		case KeyEvent.KEYCODE_VOLUME_UP:
+			if (currentAlpha == 0) {
+				showCustomKeyboard();
+				isKeyboard = true;
+			}
+			currentAlpha += (float) 0.2;
+			if (currentAlpha >= 1) {
+				currentAlpha = 1;
+			}
+			mMyKeyboard.setAlpha(currentAlpha);
 			break;
 		default:
 			Log.d("MainAcitivy", "other btn");
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
-	
+
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		
-	}	
-	
 
-Thread openInputSocket = new Thread(new Runnable() {
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		Log.d("TCP", "S: Connecting...");
-        
-		inclientSocket = null;
-		try {
-			inclientSocket = new ServerSocket(SERVERPORT_IN);
-			inclientsock = inclientSocket.accept();
-			Log.d(WiFiDirectActivity.TAG, "Server: connection done");
-			OutputStream tmp = inclientsock.getOutputStream();
-			is = new DataOutputStream(tmp);
-			mMyKeyboard.setSocket(is, Converting);
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
-});
 
+	Thread openInputSocket = new Thread(new Runnable() {
 
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			Log.d("TCP", "S: Connecting...");
 
-Thread outputThread = new Thread(new Runnable() {
-	
-	@Override
-	public void run() {
-
-		 /* Retrieve the ServerName */  
-       InetAddress outserverAddr;
-       DatagramSocket outsocket = null;   
-
-	try {
-		outserverAddr = InetAddress.getByName("192.168.49.1");
-		outsocket = new DatagramSocket(SERVERPORT_OUT, outserverAddr);
-		 Log.d("UDP", "S: Connecting...");   
-	} catch (UnknownHostException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	} catch (SocketException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}   
-
-      
-       /* Create new UDP-Socket */  
-      
-       	bufferOut = new byte[49152*8];
-		while(true)
-		{
-			
-			//bitmap=null;
-			int ou=0;
-			for(int i=0; i<8; i++){
-					try {
-	
-			           
-			            byte[] buf = new byte[49152];    
-			            DatagramPacket packet = new DatagramPacket(buf, buf.length);   
-			        
-			            outsocket.receive(packet);   
-			                 
-			            System.arraycopy(buf, 
-			                    0,
-			                    bufferOut,
-			                    buf[0]*49152,
-			                    49152);
-			           
-			        } 
-			        catch (Exception e) {
-			            e.printStackTrace();
-			        }
-				}
-				bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-				bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(( bufferOut )));
-				
-		}
-			
-		}
-});
-
-
-		// Mouse Touch Listener.
-		// screen Min X value = 11, Min Y value = 14.
-		View.OnTouchListener mViewTouchListener = new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				// TODO Auto-generated method stub
-				mouse_x = (int) event.getX() - 11;
-				mouse_y = (int) event.getY() - 14;
-				clickflag = true;
-				int mouse_value = 1;	// one click value
-				Log.d("PiMonitor", "View_Touch //  x : " + mouse_x + " y : " + mouse_y );
-				//Send to Raspberry (x, y, value)
-
-				//m.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
-				return false;
+			inclientSocket = null;
+			try {
+				inclientSocket = new ServerSocket(SERVERPORT_IN);
+				inclientsock = inclientSocket.accept();
+				Log.d(WiFiDirectActivity.TAG, "Server: connection done");
+				OutputStream tmp = inclientsock.getOutputStream();
+				is = new DataOutputStream(tmp);
+				mMyKeyboard.setSocket(is, Converting);
+			} catch (UnknownHostException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (SocketException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-		};
-		
-		// Thread to Send Mouse data
-		Thread mouseOutputThread = new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				byte[] sendData = new byte[3072];
 
-				while (true) {
+		}
+	});
 
-					if (clickflag) {
-						mouse_value = 1;
-						//데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용       
-				            sendData = Converting.jniConvert(512 * mouse_x / (display_width - 25), 384 * mouse_y / (display_height - 28), mouse_value);
-				            //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, inserverAddr, SERVERPORT_IN);
-				            
-				            try {
-				            	is.write(sendData);
-								//inclientSocket.send(sendPacket);
-								Log.d("PiMonitor", "Change Coord //  x : " + (512 * mouse_x / (display_width - 25)) + " y : " + (384 * mouse_y / (display_height - 28)) );
-				            
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							}   
-						clickflag = false;
+	Thread outputThread = new Thread(new Runnable() {
+
+		@Override
+		public void run() {
+
+			/* Retrieve the ServerName */
+			InetAddress outserverAddr;
+			DatagramSocket outsocket = null;
+
+			try {
+				outserverAddr = InetAddress.getByName("192.168.49.1");
+				outsocket = new DatagramSocket(SERVERPORT_OUT, outserverAddr);
+				Log.d("UDP", "S: Connecting...");
+			} catch (UnknownHostException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (SocketException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			/* Create new UDP-Socket */
+
+			bufferOut = new byte[49152 * 8];
+			while (true) {
+
+				// bitmap=null;
+				int ou = 0;
+				for (int i = 0; i < 8; i++) {
+					try {
+
+						byte[] buf = new byte[49152];
+						DatagramPacket packet = new DatagramPacket(buf,
+								buf.length);
+
+						outsocket.receive(packet);
+
+						System.arraycopy(buf, 0, bufferOut, buf[0] * 49152,
+								49152);
+
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
+				bitmap = Bitmap.createBitmap(width, height,
+						Bitmap.Config.RGB_565);
+				bitmap.copyPixelsFromBuffer(ByteBuffer.wrap((bufferOut)));
+
 			}
-		});
+
+		}
+	});
+
+	// Mouse Touch Listener.
+	// screen Min X value = 11, Min Y value = 14.
+	View.OnTouchListener mViewTouchListener = new View.OnTouchListener() {
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			// TODO Auto-generated method stub
+			mouse_x = (int) event.getX() - 11;
+			mouse_y = (int) event.getY() - 14;
+			clickflag = true;
+			int mouse_value = 1; // one click value
+			Log.d("PiMonitor", "View_Touch //  x : " + mouse_x + " y : "
+					+ mouse_y);
+			// Send to Raspberry (x, y, value)
+
+			// m.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+			return false;
+		}
+	};
+	
+	View.OnLongClickListener mViewLongClickListener = new View.OnLongClickListener() {
+		
+		@Override
+		public boolean onLongClick(View v) {
+			// TODO Auto-generated method stub
+			Log.d("PiMonitor", "View long click");
+			// 키보드 끄고 켜기
+			
+			return false;
+		}
+	};
+
+	
+	
+
+	// Thread to Send Mouse data
+	Thread mouseOutputThread = new Thread(new Runnable() {
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			byte[] sendData = new byte[3072];
+
+			while (true) {
+
+				if (clickflag) {
+					mouse_value = 1;
+					// 데이터를 보내려면 여기를 수정하세요. 1,15,3 에 int 숫자를 넣으세용
+					sendData = Converting.jniConvert(512 * mouse_x
+							/ (display_width - 25), 384 * mouse_y
+							/ (display_height - 28), mouse_value);
+					// DatagramPacket sendPacket = new DatagramPacket(sendData,
+					// sendData.length, inserverAddr, SERVERPORT_IN);
+
+					try {
+						is.write(sendData);
+						// inclientSocket.send(sendPacket);
+						Log.d("PiMonitor", "Change Coord //  x : "
+								+ (512 * mouse_x / (display_width - 25))
+								+ " y : "
+								+ (384 * mouse_y / (display_height - 28)));
+
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					clickflag = false;
+				}
+			}
+		}
+	});
 
 }
