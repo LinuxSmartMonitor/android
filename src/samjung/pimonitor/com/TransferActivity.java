@@ -94,7 +94,6 @@ public class TransferActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_main);
 		mView = (View) findViewById(R.id.touchview);
 		mView.setOnTouchListener(mViewTouchListener);
-		mView.setOnLongClickListener(mViewLongClickListener);
 
 		/* Keyboard Setting */
 		mMyKeyboard = (MyKeyboard) findViewById(R.id.my_keyboard);
@@ -283,21 +282,7 @@ public class TransferActivity extends Activity implements OnClickListener {
 			return false;
 		}
 	};
-	
-	View.OnLongClickListener mViewLongClickListener = new View.OnLongClickListener() {
-		
-		@Override
-		public boolean onLongClick(View v) {
-			// TODO Auto-generated method stub
-			Log.d("PiMonitor", "View long click");
-			// 키보드 끄고 켜기
-			
-			return false;
-		}
-	};
 
-	
-	
 
 	// Thread to Send Mouse data
 	Thread mouseOutputThread = new Thread(new Runnable() {
