@@ -4,7 +4,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -19,8 +18,8 @@ import android.util.Log;
 class MyKeyboard extends KeyboardView {
 
 	/* Keyboard */
-	private MyKeyboardActionListener engKey, engCapKey, hanKey, funKey;
-	private Keyboard eng = null, engCap = null, han = null, fun = null;
+	private MyKeyboardActionListener engKey, engCapKey, hanKey, funKey, shiKey, hanShiKey;
+	private Keyboard eng = null, engCap = null, han = null, fun = null, shi = null, hanShi = null;
 	boolean keyboardCheck = false;
 	public static int mKeyCode = 0;
 	private String state;
@@ -56,6 +55,8 @@ class MyKeyboard extends KeyboardView {
 		engCap = new Keyboard(context, R.xml.custom_cap_key);
 		han = new Keyboard(context, R.xml.custom_han_key);
 		fun = new Keyboard(context, R.xml.custom_function_key);
+		shi = new Keyboard(context, R.xml.custom_shift_key);
+		hanShi = new Keyboard(context, R.xml.custom_han_shift_key);
 	}
 
 	/* Socket Setting */
@@ -97,6 +98,20 @@ class MyKeyboard extends KeyboardView {
 		funKey = new MyKeyboardActionListener(act);
 		this.setOnKeyboardActionListener(funKey);
 		this.setKeyboard(fun);
+	}
+	
+	public void setActionListenerShiftKeyboard(Activity act) {
+		this.clearFocus();
+		shiKey = new MyKeyboardActionListener(act);
+		this.setOnKeyboardActionListener(shiKey);
+		this.setKeyboard(shi);
+	}
+	
+	public void setActionListenerHanShiftKeyboard(Activity act) {
+		this.clearFocus();
+		hanShiKey = new MyKeyboardActionListener(act);
+		this.setOnKeyboardActionListener(hanShiKey);
+		this.setKeyboard(hanShi);
 	}
 
 	
@@ -236,6 +251,23 @@ class MyKeyboard extends KeyboardView {
 
 				case ShiftKey:
 					isShift = !isShift;
+					if(isShift){
+						 if(state.compareTo("Eng")==0){
+							 setActionListenerShiftKeyboard(owner);
+						 }
+						 else if(state.compareTo("Han")==0){
+							 // shift 한글키로 변경
+							 setActionListenerHanShiftKeyboard(owner);
+						 }
+					}
+					else {
+						if(state.compareTo("Eng")==0){
+							setActionListenerEngKeyboard(owner);
+						}
+						else if(state.compareTo("Han")==0){
+							setActionListenerHanKeyboard(owner);
+						}
+					}
 					break;
 
 				case CtrlKey:
@@ -360,29 +392,26 @@ class MyKeyboard extends KeyboardView {
 			mapping[309] = 309; // )
 			mapping[310] = 310; // +
 			
-			mapping[311] = 311; // '
-			mapping[312] = 312; // ~
-			mapping[313] = 313; // /
-			mapping[314] = 314; // =
-			mapping[315] = 315; // \
-			mapping[316] = 316; // |
-			mapping[317] = 317; // {
-			mapping[318] = 318; // }
-			mapping[319] = 319; // [
-			mapping[320] = 320; // ]
+			mapping[311] = 41; // '
+			mapping[312] = 339; // ~
+			mapping[313] = 53; // /
+			mapping[314] = 13; // =
+			mapping[315] = 43; // \
+			mapping[316] = 341; // |
+			mapping[317] = 324; // {
+			mapping[318] = 325; // }
+			mapping[319] = 26; // [
+			mapping[320] = 27; // ]
 			
-			mapping[321] = 321; // -
-			mapping[322] = 322; // '
-			mapping[323] = 323; // <
-			mapping[324] = 324; // >
-			mapping[325] = 325; // ?
-			mapping[326] = 326; // ,
-			mapping[327] = 327; // .
-			mapping[328] = 328; // :
-			mapping[329] = 329; // ;
-			mapping[330] = 330; // ※
-			mapping[331] = 331; // ☆
-			mapping[332] = 332; // 흰 하트
+			mapping[321] = 12; // -
+			mapping[322] = 40; // '
+			mapping[323] = 349; // <
+			mapping[324] = 350; // >
+			mapping[325] = 351; // ?
+			mapping[326] = 51; // ,
+			mapping[327] = 52; // .
+			mapping[328] = 337; // :
+			mapping[329] = 39; // ;
 
 		}
 

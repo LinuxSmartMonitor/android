@@ -145,31 +145,29 @@ public class TransferActivity extends Activity implements OnClickListener {
 			}
 			break;
 
-		// 롱터치로 변환하기
 		case KeyEvent.KEYCODE_VOLUME_DOWN:
-			// 이거 다시 수정하기
-			currentAlpha -= (float) 0.2;
-			if (currentAlpha <= 0.2) {
-				goneCustomKeyboard();
-				currentAlpha = 0;
-				isKeyboard = false;
-				break;
+			// 1 -> 0.8 -> 0.6 -> 0.4 -> 0.2
+			if (currentAlpha <= 0.4) {
+				currentAlpha = 1;
 			} else {
-				mMyKeyboard.setAlpha(currentAlpha);
+				currentAlpha -= (float) 0.2;
 			}
+			Log.d("PiMonitor", "Key down " + currentAlpha);
+			mMyKeyboard.setAlpha(currentAlpha);
 			break;
 
 		case KeyEvent.KEYCODE_VOLUME_UP:
-			if (currentAlpha == 0) {
+			Log.d("MainAcitivy", "Menu btn");
+			showCustomKeyboard();
+			if (!isKeyboard) {
 				showCustomKeyboard();
 				isKeyboard = true;
+			} else {
+				goneCustomKeyboard();
+				isKeyboard = false;
 			}
-			currentAlpha += (float) 0.2;
-			if (currentAlpha >= 1) {
-				currentAlpha = 1;
-			}
-			mMyKeyboard.setAlpha(currentAlpha);
 			break;
+			
 		default:
 			Log.d("MainAcitivy", "other btn");
 		}
@@ -282,7 +280,6 @@ public class TransferActivity extends Activity implements OnClickListener {
 			return false;
 		}
 	};
-
 
 	// Thread to Send Mouse data
 	Thread mouseOutputThread = new Thread(new Runnable() {
