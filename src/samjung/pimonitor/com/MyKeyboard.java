@@ -3,7 +3,10 @@ package samjung.pimonitor.com;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -42,6 +45,8 @@ class MyKeyboard extends KeyboardView {
 	public static String SERVERIP;
 	public static int SERVERPORT_IN;
 	private DataOutputStream is_SUJIN;
+
+    private DatagramSocket inso_SUJIN;
 	// private DatagramSocket clientSocket_SUJIN;
 
 	/* Else */
@@ -60,10 +65,10 @@ class MyKeyboard extends KeyboardView {
 	}
 
 	/* Socket Setting */
-	public void setSocket(DataOutputStream keyin, jniconvert Converting) {
+	public void setSocket(DatagramSocket inso,jniconvert Converting){	
 		this.SERVERPORT_IN = TransferActivity.SERVERPORT_IN;
-		this.is_SUJIN = keyin;
-		// this.clientSocket_SUJIN = clientSocket;
+		this.inso_SUJIN = inso;
+		//this.clientSocket_SUJIN = clientSocket;
 		this.Converting = Converting;
 		keyboardOutputThread.start();
 	}
@@ -175,9 +180,14 @@ class MyKeyboard extends KeyboardView {
 					mKeyCode = MyKeyboard.mKeyCode;
 					sendData = Converting.jniConvert(-1, mKeyCode, -1);
 					try {
-						// DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr_SUJIN, SERVERPORT_IN);
-						// clientSocket_SUJIN.send(sendPacket);
-						is_SUJIN.write(sendData);
+						//DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddr_SUJIN, SERVERPORT_IN);
+						//clientSocket_SUJIN.send(sendPacket);
+						InetAddress inserverAddr;
+		            	inserverAddr = InetAddress.getByName(TransferActivity.SERVERIPADDR);
+						DatagramPacket dpack = new DatagramPacket(sendData, sendData.length,inserverAddr,3491);   
+						DatagramPacket readtmp = null;
+						//inso_SUJIN.receive(readtmp);
+		            	inso_SUJIN.send(dpack);
 					} catch (IOException e1) {
 						Log.d("MyKeyboard", "send error.");
 						e1.printStackTrace();

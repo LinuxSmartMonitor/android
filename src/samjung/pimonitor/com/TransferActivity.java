@@ -16,9 +16,18 @@
 
 package samjung.pimonitor.com;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -33,6 +42,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -42,6 +52,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 
+import com.example.android.wifidirect.DeviceListFragment;
 import com.example.android.wifidirect.WiFiDirectActivity;
 
 public class TransferActivity extends Activity implements OnClickListener {
@@ -54,7 +65,10 @@ public class TransferActivity extends Activity implements OnClickListener {
 	public static DataOutputStream is;
 	public static DisplayMetrics metrics;
 	public static int display_width, display_height;
-
+	public static String SERVERIPADDR;
+	public static File ipfile;
+    public static DatagramSocket insocket;
+    
 	boolean paused = false;
 	public String message;
 	int height = 384;
@@ -112,6 +126,9 @@ public class TransferActivity extends Activity implements OnClickListener {
 		Log.i("Display ", "width : " + display_width + " height : "
 				+ display_height);
 
+		ipfile = new File(Environment.getExternalStorageDirectory(),"ipaddr.txt");
+    	Log.d("ipfile","Path : "+ipfile.getAbsolutePath());
+	    
 		outputThread.start();
 		openInputSocket.start();
 		mouseOutputThread.start();
@@ -185,81 +202,162 @@ public class TransferActivity extends Activity implements OnClickListener {
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			Log.d("TCP", "S: Connecting...");
-
-			inclientSocket = null;
+			InetAddress inserverAddr;
+			/*
 			try {
-				inclientSocket = new ServerSocket(SERVERPORT_IN);
-				inclientsock = inclientSocket.accept();
-				Log.d(WiFiDirectActivity.TAG, "Server: connection done");
-				OutputStream tmp = inclientsock.getOutputStream();
-				is = new DataOutputStream(tmp);
-				mMyKeyboard.setSocket(is, Converting);
-			} catch (UnknownHostException e1) {
+				inserverAddr = InetAddress.getByName("192.168.49.1");
+				insocket = new DatagramSocket(SERVERPORT_IN, inserverAddr);
+				 Log.d("UDP", "Input: Connecting...");
+			} catch (UnknownHostException e2) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				e2.printStackTrace();
 			} catch (SocketException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IOException e) {
+			}*/
+			try {
+				inserverAddr = InetAddress.getByName("192.168.49.1");
+				insocket = new DatagramSocket(3491);
+				Log.d("UDP", "Input: Connecting...");
+			} catch (UnknownHostException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			} catch (SocketException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			mMyKeyboard.setSocket(insocket, Converting);
 
 		}
 	});
 
 	Thread outputThread = new Thread(new Runnable() {
-
+		
 		@Override
 		public void run() {
 
-			/* Retrieve the ServerName */
-			InetAddress outserverAddr;
-			DatagramSocket outsocket = null;
+			 /* Retrieve the ServerName */  
+	       InetAddress outserverAddr;
+	       DatagramSocket outsocket = null;   
 
+		try {
+			outserverAddr = InetAddress.getByName("192.168.49.1");
+			outsocket = new DatagramSocket(SERVERPORT_OUT, outserverAddr);
+			 Log.d("UDP", "S: Connecting...");   
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}   
+
+	      
+	       /* Create new UDP-Socket */  
+	      
+	      
+	        
+	        
+	        
+	        
+	        if(DeviceListFragment.notfirstflag == true)
+		    {
+	        	Log.d("FIRST","NoFIRST, So Make the File");
+		       	byte[] tmpbuf = new byte[100];    
+		        DatagramPacket tmppacket = new DatagramPacket(tmpbuf, tmpbuf.length);   
+		        String stre = null;
+		        byte[] tmpestr = new byte[100];;
+		        try {
+		        	
+						outsocket.receive(tmppacket);
+						int o=0;
+						while(true)
+						{
+							if('1'<=tmpbuf[o] && tmpbuf[o]<='9')
+							{
+								tmpestr[o] = tmpbuf[o];
+							}
+							else if(tmpbuf[o] == '.')
+							{
+								tmpestr[o] = tmpbuf[o];
+							}
+							else
+								break;
+							o++;
+						}
+						o++;
+						stre = new String(tmpestr, 0,o);
+						Log.d("FIRST","RECIEVE CHANGE : "+stre);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}   
+				try {
+					FileOutputStream fos = new FileOutputStream(ipfile);
+		            Writer out = new OutputStreamWriter(fos, "UTF-8");
+		            out.write(stre);
+		            out.close();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	            
+		    }
+	        FileInputStream fis;
 			try {
-				outserverAddr = InetAddress.getByName("192.168.49.1");
-				outsocket = new DatagramSocket(SERVERPORT_OUT, outserverAddr);
-				Log.d("UDP", "S: Connecting...");
-			} catch (UnknownHostException e1) {
+				fis = new FileInputStream(ipfile);
+				InputStreamReader chapterReader = new InputStreamReader(fis);
+		        BufferedReader buffreader = new BufferedReader(chapterReader);
+
+				SERVERIPADDR = buffreader.readLine();
+			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
-			} catch (SocketException e) {
+			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
-			/* Create new UDP-Socket */
-
+	        
+	        
+	        
 			bufferOut = new byte[49152 * 8];
-			while (true) {
-
-				// bitmap=null;
-				int ou = 0;
-				for (int i = 0; i < 8; i++) {
-					try {
-
-						byte[] buf = new byte[49152];
-						DatagramPacket packet = new DatagramPacket(buf,
-								buf.length);
-
-						outsocket.receive(packet);
-
-						System.arraycopy(buf, 0, bufferOut, buf[0] * 49152,
-								49152);
-
-					} catch (Exception e) {
-						e.printStackTrace();
+			while(true)
+			{
+				
+				//bitmap=null;
+				int ou=0;
+				for(int i=0; i<8; i++){
+						try {
+		
+				           
+				            byte[] buff = new byte[49152];    
+				            DatagramPacket packet = new DatagramPacket(buff, buff.length);   
+				        
+				            outsocket.receive(packet);   
+				           
+					            System.arraycopy(buff, 
+					                    0,
+					                    bufferOut,
+					                   ( buff[0])*49152,
+					                    49152);
+				      
+				        } 
+				        catch (Exception e) {
+				            e.printStackTrace();
+				        }
 					}
-				}
-				bitmap = Bitmap.createBitmap(width, height,
-						Bitmap.Config.RGB_565);
-				bitmap.copyPixelsFromBuffer(ByteBuffer.wrap((bufferOut)));
-
+					bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+					bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(( bufferOut )));
+					
 			}
-
-		}
+				
+			}
 	});
 
 	// Mouse Touch Listener.
@@ -301,8 +399,14 @@ public class TransferActivity extends Activity implements OnClickListener {
 					// sendData.length, inserverAddr, SERVERPORT_IN);
 
 					try {
-						is.write(sendData);
-						// inclientSocket.send(sendPacket);
+		            	InetAddress inserverAddr;
+		            	inserverAddr = InetAddress.getByName(SERVERIPADDR);
+		            	
+		            	DatagramPacket readtmp = null;
+		            	DatagramPacket dpack = new DatagramPacket(sendData, sendData.length,inserverAddr,3491);   
+		            	//insocket.receive(readtmp);
+		            	insocket.send(dpack);
+						//inclientSocket.send(sendPacket);
 						Log.d("PiMonitor", "Change Coord //  x : "
 								+ (512 * mouse_x / (display_width - 25))
 								+ " y : "
