@@ -400,7 +400,7 @@ class MyKeyboard extends KeyboardView {
 			mapping[307] = 307; // *
 			mapping[308] = 308; // (
 			mapping[309] = 309; // )
-			mapping[310] = 310; // +
+			mapping[310] = 311; // +
 			
 			mapping[311] = 41; // '
 			mapping[312] = 339; // ~

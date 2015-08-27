@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -36,6 +37,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -262,51 +264,45 @@ public class TransferActivity extends Activity implements OnClickListener {
 	        
 	        if(DeviceListFragment.notfirstflag == true)
 		    {
-	        	Log.d("FIRST","NoFIRST, So Make the File");
+	        	Log.d("FIRST","FIRST, So Make the File");
 		       	byte[] tmpbuf = new byte[100];    
 		        DatagramPacket tmppacket = new DatagramPacket(tmpbuf, tmpbuf.length);   
 		        String stre = null;
-		        byte[] tmpestr = new byte[100];;
+		        byte[] tmpestr = new byte[100];
+		       // Log.d("FIRST","test " + Byte.SIZE + " " + Character.SIZE);
 		        try {
 		        	
 						outsocket.receive(tmppacket);
+						
 						int o=0;
 						while(true)
 						{
 							if('1'<=tmpbuf[o] && tmpbuf[o]<='9')
 							{
-								tmpestr[o] = tmpbuf[o];
+								tmpestr[o] =  tmpbuf[o];
 							}
 							else if(tmpbuf[o] == '.')
 							{
-								tmpestr[o] = tmpbuf[o];
+								tmpestr[o] =  tmpbuf[o];
 							}
 							else
 								break;
 							o++;
 						}
-						o++;
+						//tmpestr[++o]=0;
+					
 						stre = new String(tmpestr, 0,o);
 						Log.d("FIRST","RECIEVE CHANGE : "+stre);
+						FileOutputStream fos = new FileOutputStream(ipfile);
+			            Writer out = new OutputStreamWriter(fos, "UTF-8");
+			            out.write(stre);
+			            out.close();
+			            
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}   
-				try {
-					FileOutputStream fos = new FileOutputStream(ipfile);
-		            Writer out = new OutputStreamWriter(fos, "UTF-8");
-		            out.write(stre);
-		            out.close();
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		
 	            
 		    }
 	        FileInputStream fis;
@@ -316,6 +312,8 @@ public class TransferActivity extends Activity implements OnClickListener {
 		        BufferedReader buffreader = new BufferedReader(chapterReader);
 
 				SERVERIPADDR = buffreader.readLine();
+				Log.d("NEXTTO","IP : "+SERVERIPADDR);
+				
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();

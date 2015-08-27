@@ -19,7 +19,6 @@
 JNIEXPORT jstring JNICALL Java_samjung_pimonitor_com_jniconvert_jniConvert
   (JNIEnv * env, jobject thiz, jint aa, jint bb, jint cc)
 {
-
 		jintArray intJavaArray = (*env)->NewIntArray(env, 3);
 
 		int data = (int)aa;

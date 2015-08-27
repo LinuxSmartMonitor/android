@@ -169,11 +169,12 @@ public class DeviceListFragment extends ListFragment implements PeerListListener
         }
         if(notfirstflag == false)
         {
+        	notfirstflag = true;
+    		
 	        for(int i=0; i<peers.size(); i++)
 	        {
 	        	if(peers.get(i).deviceName.compareTo("SAMJUNG_DISP") == 0)
 	        	{
-	        		notfirstflag = true;
 	        		
 	        		WiFiDirectActivity.samjung_where = peers.get(i);
 	        		WifiP2pConfig config = new WifiP2pConfig();
